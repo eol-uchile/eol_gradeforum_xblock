@@ -1,7 +1,6 @@
 """Setup for eolgradediscussion XBlock."""
 
 
-
 import os
 
 from setuptools import setup

@@ -28,6 +28,7 @@ import datetime
 import logging
 logger = logging.getLogger(__name__)
 
+
 class TestRequest(object):
     # pylint: disable=too-few-public-methods
     """
@@ -91,7 +92,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                 user=self.staff_user,
                 course_id=self.course.id)
             CourseStaffRole(self.course.id).add_users(self.staff_user)
-    
+
     def test_validate_field_data(self):
         """
             Verify if default xblock is created correctly
@@ -107,13 +108,14 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         request = TestRequest()
         request.method = 'POST'
         self.xblock.xmodule_runtime.user_is_staff = True
-        data = json.dumps({'display_name': 'testname', "puntajemax": '200', "id_forum": 'test_id'})
+        data = json.dumps({'display_name': 'testname',
+                           "puntajemax": '200', "id_forum": 'test_id'})
         request.body = data.encode()
         response = self.xblock.studio_submit(request)
         self.assertEqual(self.xblock.display_name, 'testname')
         self.assertEqual(self.xblock.puntajemax, 200)
         self.assertEqual(self.xblock.id_forum, 'test_id')
-    
+
     def test_student_view_staff(self):
         """
             Verify context in student_view staff user
@@ -140,14 +142,14 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         """
           Save score by staff user
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id' : self.student.id, 'score':"11"},
-                 {'user_id' : self.staff_user.id, 'score':"22"}]
+        datos = [{'user_id': self.student.id, 'score': "11"},
+                 {'user_id': self.staff_user.id, 'score': "22"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
 
@@ -158,21 +160,21 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.assertEqual(response['is_course_staff'], True)
         self.assertEqual(response['calificado'], 2)
         self.assertEqual(response['total_student'], 2)
-    
+
     @patch('lms.djangoapps.grades.signals.handlers.PROBLEM_WEIGHTED_SCORE_CHANGED.send')
     def test_save_student_user(self, _):
         """
           Save score by student user
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = False
-        
+
         self.xblock.scope_ids.user_id = self.student.id
-        datos = [{'user_id' : self.student.id, 'score':"11"},
-                 {'user_id' : self.staff_user.id, 'score':"22"}]
+        datos = [{'user_id': self.student.id, 'score': "11"},
+                 {'user_id': self.staff_user.id, 'score': "22"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -181,38 +183,38 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         response = self.xblock.get_context()
         self.assertEqual(response['is_course_staff'], False)
         self.assertEqual(response['puntaje'], '')
-    
+
     def test_wrong_data_staff_user(self):
         """
           Save score by staff user with wrong score
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id' : self.student.id, 'score':"asd1"},
-                 {'user_id' : self.staff_user.id, 'score':"22"}]
+        datos = [{'user_id': self.student.id, 'score': "asd1"},
+                 {'user_id': self.staff_user.id, 'score': "22"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
         data_response = json.loads(response._app_iter[0].decode())
         self.assertEqual(data_response['result'], 'error')
-    
+
     @patch('lms.djangoapps.grades.signals.handlers.PROBLEM_WEIGHTED_SCORE_CHANGED.send')
     def test_save_student_score_max_score(self, _):
         """
           Save score by staff user with score = max score
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id' : self.student.id, 'score':"100"},
-                 {'user_id' : self.staff_user.id, 'score':"100"}]
+        datos = [{'user_id': self.student.id, 'score': "100"},
+                 {'user_id': self.staff_user.id, 'score': "100"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -224,48 +226,48 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         """
           Save score by staff user with score = 0
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id' : self.student.id, 'score':"0"},
-                 {'user_id' : self.staff_user.id, 'score':"0"}]
+        datos = [{'user_id': self.student.id, 'score': "0"},
+                 {'user_id': self.staff_user.id, 'score': "0"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
         self.assertEqual(self.xblock.get_score(self.student.id), 0)
         self.assertEqual(self.xblock.get_score(self.staff_user.id), 0)
-    
+
     def test_save_student_score_min_score_wrong(self):
         """
           Save score by staff user with score < 0
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id' : self.student.id, 'score':"-10"}]
+        datos = [{'user_id': self.student.id, 'score': "-10"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
         data_response = json.loads(response._app_iter[0].decode())
         self.assertEqual(data_response['result'], 'error')
-    
+
     def test_save_student_score_min_score_wrong(self):
         """
           Save score by staff user with score > max score
         """
-        
+
         request = TestRequest()
         request.method = 'POST'
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id' : self.student.id, 'score':"101"}]
+        datos = [{'user_id': self.student.id, 'score': "101"}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -280,23 +282,23 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         """
         collection = [
             {
-                "comments_count":5,
-                "user_id":str(self.staff_user.id),
-                "created_at":"2020-11-10T18:51:04Z",
-                "username":"test1",
-                "unread_comments_count":1,
-                "commentable_id":"course",
-                "anonymous_to_peers":False,
-                "closed":False,
-                "pinned":False,
-                "updated_at":"2020-11-23T15:44:49Z",
-                "course_id":"course-v1:eol+test101+2020",
-                "id":"5faae1182f1f5e001b09d32a",
-                "anonymous":False,
-                "context":"course",
-                "title":"asdasd",
-                "votes":{},
-                "abuse_flaggers":[],
+                "comments_count": 5,
+                "user_id": str(self.staff_user.id),
+                "created_at": "2020-11-10T18:51:04Z",
+                "username": "test1",
+                "unread_comments_count": 1,
+                "commentable_id": "course",
+                "anonymous_to_peers": False,
+                "closed": False,
+                "pinned": False,
+                "updated_at": "2020-11-23T15:44:49Z",
+                "course_id": "course-v1:eol+test101+2020",
+                "id": "5faae1182f1f5e001b09d32a",
+                "anonymous": False,
+                "context": "course",
+                "title": "asdasd",
+                "votes": {},
+                "abuse_flaggers": [],
                 "read":False,
                 "type":"thread",
                 "thread_type":"question",
@@ -306,23 +308,23 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                 "body":"asdasd"
             },
             {
-                "comments_count":0,
-                "user_id":str(self.student.id),
-                "created_at":"2020-11-23T14:54:32Z",
-                "username":"test2",
-                "unread_comments_count":0,
-                "commentable_id":"course",
-                "anonymous_to_peers":False,
-                "closed":False,
-                "pinned":False,
-                "updated_at":"2020-11-23T14:54:32Z",
-                "course_id":"course-v1:eol+test101+2020",
-                "id":"5fbbcd282f1f5e001a0740c4",
-                "anonymous":True,
-                "context":"course",
-                "title":"asdasd",
-                "votes":{},
-                "abuse_flaggers":[],
+                "comments_count": 0,
+                "user_id": str(self.student.id),
+                "created_at": "2020-11-23T14:54:32Z",
+                "username": "test2",
+                "unread_comments_count": 0,
+                "commentable_id": "course",
+                "anonymous_to_peers": False,
+                "closed": False,
+                "pinned": False,
+                "updated_at": "2020-11-23T14:54:32Z",
+                "course_id": "course-v1:eol+test101+2020",
+                "id": "5fbbcd282f1f5e001a0740c4",
+                "anonymous": True,
+                "context": "course",
+                "title": "asdasd",
+                "votes": {},
+                "abuse_flaggers": [],
                 "read":True,
                 "type":"thread",
                 "thread_type":"discussion",
@@ -331,132 +333,132 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                 "last_activity_at":"2020-11-23T14:54:32Z",
                 "body":"asdaseda"
             }]
-        data_all_thread = {"page":1, "num_pages":1, "collection":collection}
+        data_all_thread = {"page": 1, "num_pages": 1, "collection": collection}
         data_thread_1 = {
-                "comments_count":3,
-                "non_endorsed_resp_total":1,
-                "user_id":str(self.staff_user.id),
-                "non_endorsed_responses":[
+            "comments_count": 3,
+            "non_endorsed_resp_total": 1,
+            "user_id": str(self.staff_user.id),
+            "non_endorsed_responses": [
+                {
+                    "anonymous": False,
+                    "body": "asd",
+                    "user_id": str(self.student.id),
+                    "thread_id": "5faae1182f1f5e001b09d32a",
+                    "username": "test2",
+                    "children": [
+                            {
+                                "anonymous": False,
+                                "body": "o mantequilla",
+                                "parent_id": "5faae14a2f1f5e001b09d32d",
+                                "user_id": str(self.staff_user.id),
+                                "created_at": "2020-11-10T18:52:01Z",
+                                "username": "test1",
+                                "children": [],
+                                "depth":1,
+                                "commentable_id":"course",
+                                "anonymous_to_peers":False,
+                                "closed":False,
+                                "votes":{},
+                                "updated_at": "2020-11-10T18:52:01Z",
+                                "at_position_list": [],
+                                "endorsed":False,
+                                "course_id":"course-v1:eol+test101+2020",
+                                "abuse_flaggers":[],
+                                "thread_id":"5faae1182f1f5e001b09d32a",
+                                "id":"5faae1512f1f5e001b09d32e",
+                                "type":"comment"
+                            }
+                    ],
+                    "depth":0,
+                    "commentable_id":"course",
+                    "anonymous_to_peers":False,
+                    "closed":False,
+                    "votes":{},
+                    "updated_at": "2020-11-10T18:51:54Z",
+                    "at_position_list": [],
+                    "endorsed":False,
+                    "course_id":"course-v1:eol+test101+2020",
+                    "abuse_flaggers":[],
+                    "created_at":"2020-11-10T18:51:54Z",
+                    "id":"5faae14a2f1f5e001b09d32d",
+                    "type":"comment"
+                }
+            ],
+            "resp_limit": 200,
+            "created_at": "2020-11-10T18:51:04Z",
+            "username": "test1",
+            "unread_comments_count": 0,
+            "commentable_id": "ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
+            "anonymous_to_peers": False,
+            "closed": False,
+            "pinned": False,
+            "updated_at": "2020-11-23T15:44:49Z",
+            "resp_total": 2,
+            "course_id": "course-v1:eol+test101+2020",
+            "id": "5faae1182f1f5e001b09d32a",
+            "anonymous": False,
+            "body": "d1",
+            "endorsed_responses": [
                     {
-                        "anonymous":False,
-                        "body":"asd",
-                        "user_id":str(self.student.id),
-                        "thread_id":"5faae1182f1f5e001b09d32a",
-                        "username":"test2",
-                        "children":[
-                        {
-                            "anonymous":False,
-                            "body":"o mantequilla",
-                            "parent_id":"5faae14a2f1f5e001b09d32d",
-                            "user_id":str(self.staff_user.id),
-                            "created_at":"2020-11-10T18:52:01Z",
-                            "username":"test1",
-                            "children":[],
-                            "depth":1,
-                            "commentable_id":"course",
-                            "anonymous_to_peers":False,
-                            "closed":False,
-                            "votes":{},
-                            "updated_at":"2020-11-10T18:52:01Z",
-                            "at_position_list":[],
-                            "endorsed":False,
-                            "course_id":"course-v1:eol+test101+2020",
-                            "abuse_flaggers":[],
-                            "thread_id":"5faae1182f1f5e001b09d32a",
-                            "id":"5faae1512f1f5e001b09d32e",
-                            "type":"comment"
-                        }
-                        ],
-                        "depth":0,
-                        "commentable_id":"course",
-                        "anonymous_to_peers":False,
-                        "closed":False,
-                        "votes":{},
-                        "updated_at":"2020-11-10T18:51:54Z",
-                        "at_position_list":[],
-                        "endorsed":False,
-                        "course_id":"course-v1:eol+test101+2020",
-                        "abuse_flaggers":[],
-                        "created_at":"2020-11-10T18:51:54Z",
-                        "id":"5faae14a2f1f5e001b09d32d",
-                        "type":"comment"
-                    }
-                ],
-                "resp_limit":200,
-                "created_at":"2020-11-10T18:51:04Z",
-                "username":"test1",
-                "unread_comments_count":0,
-                "commentable_id":"ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
-                "anonymous_to_peers":False,
-                "closed":False,
-                "pinned":False,
-                "updated_at":"2020-11-23T15:44:49Z",
-                "resp_total":2,
-                "course_id":"course-v1:eol+test101+2020",
-                "id":"5faae1182f1f5e001b09d32a",
-                "anonymous":False,
-                "body":"d1",
-                "endorsed_responses":[
-                    {
-                        "anonymous":False,
-                        "body":"asdf",
-                        "user_id":str(self.student.id),
-                        "thread_id":"5faae1182f1f5e001b09d32a",
-                        "username":"test2",
-                        "children":[
-                        {
-                            "anonymous":False,
-                            "body":"o asdasd",
-                            "parent_id":"5faae1392f1f5e001b09d32b",
-                            "user_id":str(self.staff_user.id),
-                            "created_at":"2020-11-10T18:51:45Z",
-                            "username":"test1",
-                            "children":[],
-                            "depth":1,
-                            "commentable_id":"course",
-                            "anonymous_to_peers":False,
-                            "closed":False,
-                            "votes":{},
-                            "updated_at":"2020-11-10T18:51:45Z",
-                            "at_position_list":[],
-                            "endorsed":False,
-                            "course_id":"course-v1:eol+test101+2020",
-                            "abuse_flaggers":[],
-                            "thread_id":"5faae1182f1f5e001b09d32a",
-                            "id":"5faae1412f1f5e001b09d32c",
-                            "type":"comment"
-                        },
-                        {
-                            "anonymous":False,
-                            "body":"ola soy test2",
-                            "parent_id":"5faae1392f1f5e001b09d32b",
-                            "user_id":str(self.student.id),
-                            "created_at":"2020-11-23T15:44:49Z",
-                            "username":"test2",
-                            "children":[],
-                            "depth":1,
-                            "commentable_id":"course",
-                            "anonymous_to_peers":False,
-                            "closed":False,
-                            "votes":{},
-                            "updated_at":"2020-11-23T15:44:49Z",
-                            "at_position_list":[],
-                            "endorsed":False,
-                            "course_id":"course-v1:eol+test101+2020",
-                            "abuse_flaggers":[],
-                            "thread_id":"5faae1182f1f5e001b09d32a",
-                            "id":"5fbbd8f12f1f5e001a0740c5",
-                            "type":"comment"
-                        }
+                        "anonymous": False,
+                        "body": "asdf",
+                        "user_id": str(self.student.id),
+                        "thread_id": "5faae1182f1f5e001b09d32a",
+                        "username": "test2",
+                        "children": [
+                            {
+                                "anonymous": False,
+                                "body": "o asdasd",
+                                "parent_id": "5faae1392f1f5e001b09d32b",
+                                "user_id": str(self.staff_user.id),
+                                "created_at": "2020-11-10T18:51:45Z",
+                                "username": "test1",
+                                "children": [],
+                                "depth":1,
+                                "commentable_id":"course",
+                                "anonymous_to_peers":False,
+                                "closed":False,
+                                "votes":{},
+                                "updated_at": "2020-11-10T18:51:45Z",
+                                "at_position_list": [],
+                                "endorsed":False,
+                                "course_id":"course-v1:eol+test101+2020",
+                                "abuse_flaggers":[],
+                                "thread_id":"5faae1182f1f5e001b09d32a",
+                                "id":"5faae1412f1f5e001b09d32c",
+                                "type":"comment"
+                            },
+                            {
+                                "anonymous": False,
+                                "body": "ola soy test2",
+                                "parent_id": "5faae1392f1f5e001b09d32b",
+                                "user_id": str(self.student.id),
+                                "created_at": "2020-11-23T15:44:49Z",
+                                "username": "test2",
+                                "children": [],
+                                "depth":1,
+                                "commentable_id":"course",
+                                "anonymous_to_peers":False,
+                                "closed":False,
+                                "votes":{},
+                                "updated_at": "2020-11-23T15:44:49Z",
+                                "at_position_list": [],
+                                "endorsed":False,
+                                "course_id":"course-v1:eol+test101+2020",
+                                "abuse_flaggers":[],
+                                "thread_id":"5faae1182f1f5e001b09d32a",
+                                "id":"5fbbd8f12f1f5e001a0740c5",
+                                "type":"comment"
+                            }
                         ],
                         "depth":0,
                         "endorsement":{},
-                        "commentable_id":"course",
-                        "anonymous_to_peers":False,
-                        "closed":False,
-                        "votes":{},
-                        "updated_at":"2020-11-10T18:58:28Z",
-                        "at_position_list":[],
+                        "commentable_id": "course",
+                        "anonymous_to_peers": False,
+                        "closed": False,
+                        "votes": {},
+                        "updated_at": "2020-11-10T18:58:28Z",
+                        "at_position_list": [],
                         "endorsed":True,
                         "course_id":"course-v1:eol+test101+2020",
                         "abuse_flaggers":[],
@@ -464,94 +466,86 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                         "id":"5faae1392f1f5e001b09d32b",
                         "type":"comment"
                     }
-                ],
-                "context":"course",
-                "title":"p1",
-                "votes":{},
-                "abuse_flaggers":[],
-                "read":True,
-                "type":"thread",
-                "thread_type":"question",
-                "at_position_list":[],
-                "endorsed":True,
-                "last_activity_at":"2020-11-23T15:44:49Z",
-                "resp_skip":0
-            }
-        data_thread_2 = {
-                "comments_count":2,
-                "user_id":str(self.student.id),
-                "resp_limit":200,
-                "title":"p2",
-                "created_at":"2020-11-16T17:49:47Z",
-                "username":"test2",
-                "unread_comments_count":0,
-                "commentable_id":"ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
-                "anonymous_to_peers":False,
-                "closed":False,
-                "pinned":False,
-                "updated_at":"2020-11-20T14:45:06Z",
-                "resp_total":1,
-                "course_id":"course-v1:eol+test101+2020",
-                "id":"5fbbcd282f1f5e001a0740c4",
-                "anonymous":True,
-                "body":"d2",
-                "context":"course",
-                "children":[
-                    {
-                        "anonymous":False,
-                        "body":"shajdkhsajkdhsajd",
-                        "user_id":str(self.student.id),
-                        "thread_id":"5fbbcd282f1f5e001a0740c4",
-                        "username":"test1",
-                        "children":[
-                            {
-                                "anonymous":False,
-                                "body":"hsajdhjsakd",
-                                "parent_id":"5fb71232132130019e5c0d1",
-                                "user_id":str(self.staff_user.id),
-                                "created_at":"2020-11-20T14:45:06Z",
-                                "username":"test2",
-                                "children":[],
-                                "depth":1,
-                                "commentable_id":"ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
-                                "anonymous_to_peers":False,
-                                "closed":False,
-                                "votes":{},
-                                "updated_at":"2020-11-20T14:45:06Z",
-                                "at_position_list":[],
-                                "endorsed":False,
-                                "course_id":"course-v1:eol+test101+2020",
-                                "abuse_flaggers":[],
-                                "thread_id":"5fbbcd282f1f5e001a0740c4",
-                                "id":"5fb7d6214231245e0019e5c0d2",
-                                "type":"comment"
-                            }],
-                        "depth":0,
-                        "commentable_id":"ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
-                        "anonymous_to_peers":False,
-                        "closed":False,
-                        "votes":{},
-                        "updated_at":"2020-11-20T14:44:56Z",
-                        "at_position_list":[],
-                        "endorsed":False,
-                        "course_id":"course-v1:eol+test101+2020",
-                        "abuse_flaggers":[],
-                        "created_at":"2020-11-20T14:44:56Z",
-                        "id":"5fb71232132130019e5c0d1",
-                        "type":"comment"
-                    }],
-                "votes":{},
-                "abuse_flaggers":[],
-                "courseware_title":"Week 1 / Topic-Level Student-Visible Label",
-                "read":True,
-                "type":"thread",
-                "thread_type":"discussion",
-                "at_position_list":[],
-                "endorsed":False,
-                "last_activity_at":"2020-11-20T14:45:06Z",
-                "courseware_url":"/courses/course-v1:eol+test101+2020/jump_to/block-v1:eol+test101+2020+type@discussion+block@62b0a5dfbecb4738806620e2d4964a12",
-                "resp_skip":0
-                }
+            ],
+            "context": "course",
+            "title": "p1",
+            "votes": {},
+            "abuse_flaggers": [],
+            "read": True,
+            "type": "thread",
+            "thread_type": "question",
+            "at_position_list": [],
+            "endorsed": True,
+            "last_activity_at": "2020-11-23T15:44:49Z",
+            "resp_skip": 0
+        }
+        data_thread_2 = {"comments_count": 2,
+                         "user_id": str(self.student.id),
+                         "resp_limit": 200,
+                         "title": "p2",
+                         "created_at": "2020-11-16T17:49:47Z",
+                         "username": "test2",
+                         "unread_comments_count": 0,
+                         "commentable_id": "ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
+                         "anonymous_to_peers": False,
+                         "closed": False,
+                         "pinned": False,
+                         "updated_at": "2020-11-20T14:45:06Z",
+                         "resp_total": 1,
+                         "course_id": "course-v1:eol+test101+2020",
+                         "id": "5fbbcd282f1f5e001a0740c4",
+                         "anonymous": True,
+                         "body": "d2",
+                         "context": "course",
+                         "children": [{"anonymous": False,
+                                       "body": "shajdkhsajkdhsajd",
+                                       "user_id": str(self.student.id),
+                                       "thread_id": "5fbbcd282f1f5e001a0740c4",
+                                       "username": "test1",
+                                       "children": [{"anonymous": False,
+                                                     "body": "hsajdhjsakd",
+                                                     "parent_id": "5fb71232132130019e5c0d1",
+                                                     "user_id": str(self.staff_user.id),
+                                                     "created_at": "2020-11-20T14:45:06Z",
+                                                     "username": "test2",
+                                                     "children": [],
+                                                     "depth":1,
+                                                     "commentable_id":"ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
+                                                     "anonymous_to_peers":False,
+                                                     "closed":False,
+                                                     "votes":{},
+                                                     "updated_at": "2020-11-20T14:45:06Z",
+                                                     "at_position_list": [],
+                                                     "endorsed":False,
+                                                     "course_id":"course-v1:eol+test101+2020",
+                                                     "abuse_flaggers":[],
+                                                     "thread_id":"5fbbcd282f1f5e001a0740c4",
+                                                     "id":"5fb7d6214231245e0019e5c0d2",
+                                                     "type":"comment"}],
+                                       "depth":0,
+                                       "commentable_id":"ecedb9f8c633496d3fc4bd014ee30a65c75796f2",
+                                       "anonymous_to_peers":False,
+                                       "closed":False,
+                                       "votes":{},
+                                       "updated_at": "2020-11-20T14:44:56Z",
+                                       "at_position_list": [],
+                                       "endorsed":False,
+                                       "course_id":"course-v1:eol+test101+2020",
+                                       "abuse_flaggers":[],
+                                       "created_at":"2020-11-20T14:44:56Z",
+                                       "id":"5fb71232132130019e5c0d1",
+                                       "type":"comment"}],
+                         "votes": {},
+                         "abuse_flaggers": [],
+                         "courseware_title": "Week 1 / Topic-Level Student-Visible Label",
+                         "read": True,
+                         "type": "thread",
+                         "thread_type": "discussion",
+                         "at_position_list": [],
+                         "endorsed": False,
+                         "last_activity_at": "2020-11-20T14:45:06Z",
+                         "courseware_url": "/courses/course-v1:eol+test101+2020/jump_to/block-v1:eol+test101+2020+type@discussion+block@62b0a5dfbecb4738806620e2d4964a12",
+                         "resp_skip": 0}
         get.side_effect = [
             namedtuple(
                 "Request", [
@@ -560,12 +554,12 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
             namedtuple(
                 "Request", [
                     "status_code", "json"])(
-                200, lambda:data_thread_1), 
+                200, lambda:data_thread_1),
             namedtuple(
                 "Request", [
                     "status_code", "json"])(
-                200, lambda:data_thread_2),]
-        
+                200, lambda:data_thread_2), ]
+
         request = TestRequest()
         request.method = 'POST'
         data = json.dumps({})
@@ -576,21 +570,28 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.id_forum = 'adsadad'
         response = self.xblock.get_data_forum(request)
         data_response = json.loads(response._app_iter[0].decode())
-        
+
         self.assertEqual(data_response['result'], 'success')
-        lista_alumnos = [{'id': self.staff_user.id,'username': self.staff_user.username,'correo': self.staff_user.email,'score': '','student_forum': {
-                "5faae1182f1f5e001b09d32a": {},
-                "5fbbcd282f1f5e001a0740c4":{"5fb71232132130019e5c0d1":["5fb7d6214231245e0019e5c0d2"]}
-                }
-            },
-            {'id': self.student.id,'username': self.student.username,'correo': self.student.email,'score': '','student_forum': {
-                '5fbbcd282f1f5e001a0740c4': {}, 
-                '5faae1182f1f5e001b09d32a': {
-                    '5faae14a2f1f5e001b09d32d': [], 
-                    '5faae1392f1f5e001b09d32b': []
-                    }
-                }
-            }]
+        lista_alumnos = [
+            {
+                'id': self.staff_user.id,
+                'username': self.staff_user.username,
+                'correo': self.staff_user.email,
+                'score': '',
+                'student_forum': {
+                    "5faae1182f1f5e001b09d32a": {},
+                    "5fbbcd282f1f5e001a0740c4": {
+                        "5fb71232132130019e5c0d1": ["5fb7d6214231245e0019e5c0d2"]}}},
+            {
+                'id': self.student.id,
+                'username': self.student.username,
+                'correo': self.student.email,
+                    'score': '',
+                    'student_forum': {
+                        '5fbbcd282f1f5e001a0740c4': {},
+                        '5faae1182f1f5e001b09d32a': {
+                            '5faae14a2f1f5e001b09d32d': [],
+                             '5faae1392f1f5e001b09d32b': []}}}]
         self.assertEqual(data_response['lista_alumnos'], lista_alumnos)
 
     @patch('openedx.core.djangoapps.django_comment_common.models.ForumsConfig.current')
@@ -600,14 +601,14 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
           test get_data_forum fail to get all threads
         """
         collection = []
-        data_all_thread = {"page":1, "num_pages":1, "collection":collection}
+        data_all_thread = {"page": 1, "num_pages": 1, "collection": collection}
         get.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "text"])(
                 400, data_all_thread),
-            ]
-        
+        ]
+
         request = TestRequest()
         request.method = 'POST'
         data = json.dumps({})
@@ -627,14 +628,14 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
           test get_data_forum when id_discussion dont have threads
         """
         collection = []
-        data_all_thread = {"page":1, "num_pages":1, "collection":collection}
+        data_all_thread = {"page": 1, "num_pages": 1, "collection": collection}
         get.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "json"])(
                 200, lambda:data_all_thread),
-            ]
-        
+        ]
+
         request = TestRequest()
         request.method = 'POST'
         data = json.dumps({})
@@ -654,14 +655,14 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
           test get_data_forum without set id_forum
         """
         collection = []
-        data_all_thread = {"page":1, "num_pages":1, "collection":collection}
+        data_all_thread = {"page": 1, "num_pages": 1, "collection": collection}
         get.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "json"])(
                 200, lambda:data_all_thread),
-            ]
-        
+        ]
+
         request = TestRequest()
         request.method = 'POST'
         data = json.dumps({})
@@ -681,23 +682,23 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         """
         collection = [
             {
-                "comments_count":5,
-                "user_id":str(self.staff_user.id),
-                "created_at":"2020-11-10T18:51:04Z",
-                "username":"test1",
-                "unread_comments_count":1,
-                "commentable_id":"course",
-                "anonymous_to_peers":False,
-                "closed":False,
-                "pinned":False,
-                "updated_at":"2020-11-23T15:44:49Z",
-                "course_id":"course-v1:eol+test101+2020",
-                "id":"5faae1182f1f5e001b09d32a",
-                "anonymous":False,
-                "context":"course",
-                "title":"asdasd",
-                "votes":{},
-                "abuse_flaggers":[],
+                "comments_count": 5,
+                "user_id": str(self.staff_user.id),
+                "created_at": "2020-11-10T18:51:04Z",
+                "username": "test1",
+                "unread_comments_count": 1,
+                "commentable_id": "course",
+                "anonymous_to_peers": False,
+                "closed": False,
+                "pinned": False,
+                "updated_at": "2020-11-23T15:44:49Z",
+                "course_id": "course-v1:eol+test101+2020",
+                "id": "5faae1182f1f5e001b09d32a",
+                "anonymous": False,
+                "context": "course",
+                "title": "asdasd",
+                "votes": {},
+                "abuse_flaggers": [],
                 "read":False,
                 "type":"thread",
                 "thread_type":"question",
@@ -706,7 +707,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                 "last_activity_at":"2020-11-23T15:44:49Z",
                 "body":"asdasd"
             }]
-        data_all_thread = {"page":1, "num_pages":1, "collection":collection}
+        data_all_thread = {"page": 1, "num_pages": 1, "collection": collection}
         data_thread_1 = {}
         get.side_effect = [
             namedtuple(
@@ -716,9 +717,9 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
             namedtuple(
                 "Request", [
                     "status_code", "text"])(
-                400, data_thread_1), 
-            ]
-        
+                400, data_thread_1),
+        ]
+
         request = TestRequest()
         request.method = 'POST'
         data = json.dumps({})
@@ -729,12 +730,17 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.id_forum = 'adsadad'
         response = self.xblock.get_data_forum(request)
         data_response = json.loads(response._app_iter[0].decode())
-        
+
         self.assertEqual(data_response['result'], 'success')
-        lista_alumnos = [{'id': self.staff_user.id,'username': self.staff_user.username,'correo': self.staff_user.email,'score': '','student_forum': {
-                "5faae1182f1f5e001b09d32a": {},
-                }
-            },
-            {'id': self.student.id,'username': self.student.username,'correo': self.student.email,'score': '','student_forum': {}
-            }]
+        lista_alumnos = [{'id': self.staff_user.id,
+                          'username': self.staff_user.username,
+                          'correo': self.staff_user.email,
+                          'score': '',
+                          'student_forum': {"5faae1182f1f5e001b09d32a": {},
+                                            }},
+                         {'id': self.student.id,
+                          'username': self.student.username,
+                          'correo': self.student.email,
+                          'score': '',
+                          'student_forum': {}}]
         self.assertEqual(data_response['lista_alumnos'], lista_alumnos)

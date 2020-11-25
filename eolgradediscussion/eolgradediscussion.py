@@ -27,7 +27,9 @@ loader = ResourceLoader(__name__)
 
 def _(text): return text
 
+
 XBLOCK_TYPE = "eolgradediscussion"
+
 
 def reify(meth):
     """
@@ -95,8 +97,16 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             "static/js/src/eolgradediscussion_studio.js"))
         myrequest = get_current_request()
         settings = {
-            'url_get_discussions': myrequest.build_absolute_uri('/api/discussion/v1/course_topics/{}'.format(str(self.course_id))).replace('studio.', '', 1).replace('http:', 'https:', 1)
-        }
+            'url_get_discussions': myrequest.build_absolute_uri(
+                '/api/discussion/v1/course_topics/{}'.format(
+                    str(
+                        self.course_id))).replace(
+                'studio.',
+                '',
+                1).replace(
+                'http:',
+                'https:',
+                1)}
         frag.initialize_js('EolGradeDiscussionXBlock', json_args=settings)
         return frag
 
@@ -116,7 +126,8 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         return frag
 
     def get_context(self):
-        context = {'xblock': self, 'location': str(self.location).split('@')[-1]}
+        context = {'xblock': self, 'location': str(
+            self.location).split('@')[-1]}
         course_key = self.course_id
         if self.show_staff_grading_interface():
             from django.contrib.auth.models import User
@@ -126,12 +137,15 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 courseenrollment__is_active=1
             ).order_by('username').values('id', 'username', 'email')
             filter_all_sub = {}
-            all_submission = list(submissions_api.get_all_course_submission_information(self.course_id, XBLOCK_TYPE))
+            all_submission = list(
+                submissions_api.get_all_course_submission_information(
+                    self.course_id, XBLOCK_TYPE))
             for student_item, submission, score in all_submission:
                 if self.block_id == student_item['item_id']:
-                    filter_all_sub[student_item['student_id']] = score['points_earned']
+                    filter_all_sub[student_item['student_id']
+                                   ] = score['points_earned']
             calificado = 0
-            for a in enrolled_students:   
+            for a in enrolled_students:
                 anonymous_id = self.get_anonymous_id(a['id'])
                 if anonymous_id in filter_all_sub:
                     if filter_all_sub[anonymous_id] is not None and filter_all_sub[anonymous_id] >= 0:
@@ -179,7 +193,9 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         from student.models import anonymous_id_for_user
 
         course_key = self.course_id
-        return anonymous_id_for_user(User.objects.get(id=student_id), course_key)
+        return anonymous_id_for_user(
+            User.objects.get(
+                id=student_id), course_key)
 
     def is_instructor(self):
         # pylint: disable=no-member
@@ -239,7 +255,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             return score['points_earned']
         else:
             return None
-    
+
     def get_all_thread(self, discussion_id):
         """
             Get all thread with the specified discussion ID.
@@ -257,9 +273,13 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         try:
             paginated_results = cc.Thread.search(query_params)
         except cc.utils.CommentClientRequestError:
-            log.info('EolGradeForum - Error en obtener las publicaciones id_forum: {}'.format(discussion_id))
+            log.info(
+                'EolGradeForum - Error en obtener las publicaciones id_forum: {}'.format(discussion_id))
             return None
-        return {'collection': paginated_results.collection, 'page': paginated_results.page, 'num_pages': paginated_results.num_pages}
+        return {
+            'collection': paginated_results.collection,
+            'page': paginated_results.page,
+            'num_pages': paginated_results.num_pages}
 
     def find_thread(self, thread_id, resp_init, resp_limit):
         """
@@ -279,7 +299,8 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 response_skip=resp_init,
                 response_limit=resp_limit)
         except cc.utils.CommentClientRequestError:
-            log.info('EolGradeForum - Error en obtener la publicacion thread_id: {}'.format(thread_id))
+            log.info(
+                'EolGradeForum - Error en obtener la publicacion thread_id: {}'.format(thread_id))
             return None
 
         return thread
@@ -291,7 +312,8 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         score = True
         for fila in data.get('data'):
             if fila['score'] != '':
-                if not str(fila['score']).lstrip('+').isdigit() or int(fila['score']) < 0 or int(fila['score']) > self.puntajemax:
+                if not str(fila['score']).lstrip(
+                        '+').isdigit() or int(fila['score']) < 0 or int(fila['score']) > self.puntajemax:
                     score = False
                     break
         return score
@@ -315,7 +337,8 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                     from submissions import api as submissions_api
                     course_key = self.course_id
                     user_score = User.objects.get(id=user_data['user_id'])
-                    anonymous_user_id = anonymous_id_for_user(user_score, course_key)
+                    anonymous_user_id = anonymous_id_for_user(
+                        user_score, course_key)
                     submission = self.get_submission(anonymous_user_id)
 
                     if submission:
@@ -370,16 +393,20 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         if len(hilos['collection']) == 0:
             log.info('EolGradeForum - Foro sin publicaciones')
             return {'result': 'no data'}
-        content_forum, student_data = self.reduce_data_forum(hilos['collection'])
+        content_forum, student_data = self.reduce_data_forum(
+            hilos['collection'])
         enrolled_students = User.objects.filter(
             courseenrollment__course_id=course_key,
             courseenrollment__is_active=1
         ).order_by('username').values('id', 'username', 'email')
         filter_all_sub = {}
-        all_submission = list(submissions_api.get_all_course_submission_information(self.course_id, XBLOCK_TYPE))
+        all_submission = list(
+            submissions_api.get_all_course_submission_information(
+                self.course_id, XBLOCK_TYPE))
         for student_item, submission, score in all_submission:
             if self.block_id == student_item['item_id']:
-                filter_all_sub[student_item['student_id']] = score['points_earned']
+                filter_all_sub[student_item['student_id']
+                               ] = score['points_earned']
 
         lista_alumnos = []
         calificado = 0
@@ -395,12 +422,15 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                     calificado = calificado + 1
 
             lista_alumnos.append({'id': a['id'],
-                                    'username': a['username'],
-                                    'correo': a['email'],
-                                    'score': puntaje,
-                                    'student_forum': student_forum})
+                                  'username': a['username'],
+                                  'correo': a['email'],
+                                  'score': puntaje,
+                                  'student_forum': student_forum})
 
-        return {'result': 'success', 'lista_alumnos': lista_alumnos, 'content_forum': content_forum}
+        return {
+            'result': 'success',
+            'lista_alumnos': lista_alumnos,
+            'content_forum': content_forum}
 
     def reduce_data_forum(self, hilos):
         """
@@ -464,11 +494,14 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                         if sub_comment['user_id'] not in student_data:
                             student_data[sub_comment['user_id']] = {}
                         if hilo['id'] not in student_data[sub_comment['user_id']]:
-                            student_data[sub_comment['user_id']][hilo['id']] = {}
+                            student_data[sub_comment['user_id']
+                                         ][hilo['id']] = {}
                         if comment['id'] not in student_data[sub_comment['user_id']][hilo['id']]:
-                            student_data[sub_comment['user_id']][hilo['id']][comment['id']] = []
-                        
-                        student_data[sub_comment['user_id']][hilo['id']][comment['id']].append(sub_comment['id'])
+                            student_data[sub_comment['user_id']
+                                         ][hilo['id']][comment['id']] = []
+
+                        student_data[sub_comment['user_id']][hilo['id']
+                                                             ][comment['id']].append(sub_comment['id'])
                 ##END FOR###############################################
                 content_forum[comment['id']] = aux_comment
                 if hilo['user_id'] != comment['user_id']:
@@ -476,14 +509,15 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                         student_data[comment['user_id']] = {}
                     if hilo['id'] not in student_data[comment['user_id']]:
                         student_data[comment['user_id']][hilo['id']] = {}
-                    student_data[comment['user_id']][hilo['id']][comment['id']] = []
-                    
+                    student_data[comment['user_id']
+                                 ][hilo['id']][comment['id']] = []
+
             ##END FOR###################################################
             content_forum[hilo['id']] = aux_thread
             if hilo['user_id'] not in student_data:
                 student_data[hilo['user_id']] = {}
             student_data[hilo['user_id']][hilo['id']] = {}
-        
+
         return content_forum, student_data
 
     def render_template(self, template_path, context):
