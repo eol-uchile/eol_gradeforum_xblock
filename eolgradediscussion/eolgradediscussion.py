@@ -19,6 +19,7 @@ from xblock.fields import Integer, Scope, String, Dict, Float, Boolean, List, Da
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from opaque_keys.edx.keys import CourseKey, UsageKey
+from django.urls import reverse
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -95,6 +96,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         frag.add_css(self.resource_string("static/css/eolgradediscussion.css"))
         frag.add_javascript(self.resource_string(
             "static/js/src/eolgradediscussion_studio.js"))
+        from openedx.core.djangoapps.theming.helpers import get_current_request
         myrequest = get_current_request()
         settings = {
             'url_get_discussions': myrequest.build_absolute_uri(
@@ -103,9 +105,6 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                         self.course_id))).replace(
                 'studio.',
                 '',
-                1).replace(
-                'http:',
-                'https:',
                 1)}
         frag.initialize_js('EolGradeDiscussionXBlock', json_args=settings)
         return frag
@@ -451,6 +450,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 'body': hilo['body'],
                 'comments_count': hilo['comments_count'],
                 'children': [],
+                'url_thread': reverse('single_thread', kwargs={'course_id':hilo['course_id'],'discussion_id':hilo['commentable_id'], 'thread_id':hilo['id']})
             }
             lista_comentarios = []
             resp_hilo = self.find_thread(hilo['id'], 0, 200)

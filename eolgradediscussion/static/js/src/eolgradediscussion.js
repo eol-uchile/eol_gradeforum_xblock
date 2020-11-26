@@ -255,7 +255,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         var flecha = '<span class="fa fa-chevron-right" aria-hidden="true" ' + style_flecha + '></span>';
         var thread_html = '<li class="outline-item main_thread"><div class="row row_gradeforum">'+
                     '<div class="col-md-3 eolgradediscussion_username"><span> '+data['username'] +'</span></div>'+
-                    '<div class="col-md-7 eolgradediscussion_comment" aria-controls="'+ data['id']+'"><span>'+ data['title'] +'</span></div>'+
+                    '<div class="col-md-7 eolgradediscussion_comment" aria-controls="'+ data['id']+'"><a href="'+ data['url_thread'] +'" target="_blank" style="color: #0075b4;">'+ data['title'] +'</a></div>'+
                     '<div class="col-md-2 eolgradediscussion_flecha"><button class="forumgrade-row-button" aria-expanded="false" aria-controls="'+thread_id+'">'+
                         flecha+
                     '</button></div></div><div class="row row_description"><div class="col-md-12 col_description"><span>'+ data['body'] +'</span></div></div>';

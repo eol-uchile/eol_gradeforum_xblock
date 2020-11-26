@@ -49,12 +49,13 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         // Show loading and hide elements
         $(element).find('#eolgradediscussion_loading').show();
         $(element).find('.eolgradediscussion_studio').hide();
+        $(element).find('.eolgradediscussion_error').hide();
         $(element).find('.eolgradediscussion_studio li.field').hide();
         $(element).find('.save-button').hide();
         get_ids_discussion()
         function get_ids_discussion() {
             /*
-            * .
+            * Get all ids discussion
             */
             url_get_discussions = settings.url_get_discussions;
             $.ajax({
@@ -92,7 +93,8 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
                     $(element).find('.save-button').show();
                 },
                 error: function() {
-                    debugger
+                    $(element).find('#eolgradediscussion_loading').hide();
+                    $(element).find('.eolgradediscussion_error').show();
                     runtime.notify('error',  {
                         title: 'Error: Falló en obtener los datos.',
                         message: 'No se pudo obterner los datos de los foros del curso, actualice la pagina e intente nuevamente, si el problema persiste contactese con mesa de ayuda.'
