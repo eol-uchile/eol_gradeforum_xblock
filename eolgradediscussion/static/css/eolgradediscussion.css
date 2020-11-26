@@ -252,3 +252,23 @@
     z-index: 2;
     text-decoration: none;
 }
+.eolgradediscussion_block_author .alert-info {
+    background-color: #d9edf7;
+    border-color: #bcdff1;
+    color: #31708f !important;
+}
+
+.eolgradediscussion_block_author .alert {
+    position: relative;
+    font-style: italic;
+    padding: .75rem 1.25rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    margin-bottom: 1em;
+}
+
+.eolgradediscussion_block_author .alert-warning {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24 !important;
+}

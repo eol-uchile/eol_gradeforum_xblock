@@ -455,18 +455,8 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 'children': [],
                 'url_thread': reverse('single_thread', kwargs={'course_id':hilo['course_id'],'discussion_id':hilo['commentable_id'], 'thread_id':hilo['id']})
             }
-            lista_comentarios = []
-            resp_hilo = self.find_thread(hilo['id'], 0, 200)
-            if resp_hilo is not None:
-                thread = resp_hilo.attributes
-                aux_thread['resp_total'] = thread['resp_total']
-
-                lista_comentarios = []
-                if hilo['thread_type'] == 'discussion':
-                    lista_comentarios = thread['children']
-                elif hilo['thread_type'] == 'question':
-                    lista_comentarios = thread['endorsed_responses']
-                    lista_comentarios.extend(thread['non_endorsed_responses'])
+            lista_comentarios, resp_total = self.get_all_comments_thread(hilo['id'])
+            aux_thread['resp_total'] = resp_total
 
             for comment in lista_comentarios:
                 aux_thread['children'].append(comment['id'])
@@ -522,6 +512,35 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             student_data[hilo['user_id']][hilo['id']] = {}
 
         return content_forum, student_data
+
+    def get_all_comments_thread(self, id_thread):
+        """
+            Get all comments for id_thread
+        """
+        children = []
+        endorsed_responses = []
+        non_endorsed_responses = []
+        limit = 200
+        skip = 0
+        aux = -1
+        resp_total = 0
+
+        while aux < resp_total:
+            resp_hilo = self.find_thread(id_thread, skip, limit)
+            if resp_hilo is not None:
+                thread = resp_hilo.attributes
+                resp_total = thread['resp_total']
+                if thread['thread_type'] == 'discussion':
+                    children.extend(thread['children'])
+                elif thread['thread_type'] == 'question':
+                    endorsed_responses.extend(thread['endorsed_responses'])
+                    non_endorsed_responses.extend(thread['non_endorsed_responses'])
+            aux = limit
+            skip = limit
+            limit = limit + 200
+
+        list_comment = children + endorsed_responses + non_endorsed_responses
+        return list_comment, resp_total
 
     def render_template(self, template_path, context):
         template_str = self.resource_string(template_path)
