@@ -53,12 +53,12 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
     display_name = String(
         display_name="Display Name",
         help="Display name for this module",
-        default="Participacion Foro",
+        default="Participación Foro",
         scope=Scope.settings,
     )
     puntajemax = Integer(
-        display_name='Puntaje Maximo',
-        help='Entero que representa puntaje maximo',
+        display_name='Puntaje Máximo',
+        help='Entero que representa puntaje máximo',
         default=100,
         values={'min': 0},
         scope=Scope.settings,
