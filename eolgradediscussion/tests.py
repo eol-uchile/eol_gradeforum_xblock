@@ -97,7 +97,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         """
             Verify if default xblock is created correctly
         """
-        self.assertEqual(self.xblock.display_name, 'Participacion Foro')
+        self.assertEqual(self.xblock.display_name, 'Participación Foro')
         self.assertEqual(self.xblock.puntajemax, 100)
         self.assertEqual(self.xblock.id_forum, '')
 
