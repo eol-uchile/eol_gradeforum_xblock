@@ -1,6 +1,6 @@
 # EOL Grade Forum XBlock
 
-![https://github.com/eol-uchile/eol_gradeforum_xblock/actions](https://github.com/eol-uchile/eol_grade_forum_xblock/workflows/Python%20application/badge.svg)
+![https://github.com/eol-uchile/eol_gradeforum_xblock/actions](https://github.com/eol-uchile/eol_gradeforum_xblock/workflows/Python%20application/badge.svg)
 
 This XBlock allow to grade the participation in the forum according to the student.
 

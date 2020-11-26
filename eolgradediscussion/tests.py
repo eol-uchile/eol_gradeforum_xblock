@@ -274,6 +274,22 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         data_response = json.loads(response._app_iter[0].decode())
         self.assertEqual(data_response['result'], 'error')
 
+    def test_get_data_forum_no_course_staff(self):
+        """
+          test get_data_forum when user is not course staff
+        """
+        request = TestRequest()
+        request.method = 'POST'
+        data = json.dumps({})
+        request.body = data.encode()
+
+        self.xblock.xmodule_runtime.user_is_staff = False
+        self.xblock.scope_ids.user_id = self.student.id
+        self.xblock.id_forum = 'adsadad'
+        response = self.xblock.get_data_forum(request)
+        data_response = json.loads(response._app_iter[0].decode())
+        self.assertEqual(data_response['result'], 'user is not course staff')
+
     @patch('openedx.core.djangoapps.django_comment_common.models.ForumsConfig.current')
     @patch('requests.request')
     def test_get_data_forum(self, get, _):

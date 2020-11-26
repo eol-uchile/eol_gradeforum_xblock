@@ -380,6 +380,9 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         """
             Get all threads with comments
         """
+        if not self.show_staff_grading_interface():
+            log.info('EolGradeForum - Usuario sin Permisos - user_id: {}'.format(self.scope_ids.user_id))
+            return { 'result': 'user is not course staff'}
         from django.contrib.auth.models import User
         from submissions import api as submissions_api
         course_key = self.course_id

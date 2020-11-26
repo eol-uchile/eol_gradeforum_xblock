@@ -126,15 +126,20 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             }
             else {
                 titulo = $(element).find('#forum-grade-title')
-                if (response.result == 'no data' ){
-                    titulo.html('Foro sin datos.');
+                if (response.result == 'user is not course staff' ){
+                    titulo.html('Usuario no tiene permisos para obtener los datos.');
                 }
                 else {
-                    if (response.result == 'no id_forum' ){
-                        titulo.html('Componente no configurado');
+                    if (response.result == 'no data' ){
+                        titulo.html('Foro sin datos.');
                     }
                     else {
-                        titulo.html('Se ha producido un error en obtener los datos');
+                        if (response.result == 'no id_forum' ){
+                            titulo.html('Componente no configurado.');
+                        }
+                        else {
+                            titulo.html('Se ha producido un error en obtener los datos.');
+                        }
                     }
                 }
             }
