@@ -111,10 +111,11 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         }
     }
 
-    $(element).find('input[name=forum-grade-button]').live('click', function() {
+    $(element).find('input[name=forum-grade-button]').live('click', function(e) {
         /* 
             Get forum data
         */
+        e.currentTarget.disabled = true;
         $(element).find('#ui-loading-forum-grade-load').show()
         var id_modal = $(this)[0].getAttribute('aria-controls')
         var forum_modal =  document.getElementById(id_modal)
@@ -146,14 +147,15 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             $(element).find('#ui-loading-forum-grade-load').hide();
             forum_modal.style.display = "block";
             window.scroll(0,findPos(document.getElementById(id_modal)) - 450);
+            e.currentTarget.disabled = false;
         }).fail(function() {
             titulo = $(element).find('#forum-grade-title')
             titulo.html('Se ha producido un error en obtener los datos');
             $(element).find('#ui-loading-forum-grade-load').hide();
             forum_modal.style.display = "block";
             window.scroll(0,findPos(document.getElementById(id_modal)) - 450);
+            e.currentTarget.disabled = false;
         });
-               
     });
 
     function create_accordion_user(data, content_forum){
