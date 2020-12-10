@@ -491,3 +491,7 @@
     border-color: #f5c6cb;
     color: #721c24 !important;
 }
+
+.eolgradediscussion_block #checkbox_users {
+    margin-top: 12px;
+}

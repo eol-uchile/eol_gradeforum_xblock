@@ -97,6 +97,14 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             });
         }
     });
+    $(element).find('#checkbox_users').live('change', function(e) {
+        if (e.target.checked) {
+            $(element).find('.class_empty_main_user').hide()
+        }
+        else {
+            $(element).find('.class_empty_main_user').show()
+        }
+    });
 
     function findPos(obj) {
         /*
@@ -116,6 +124,10 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             Get forum data
         */
         e.currentTarget.disabled = true;
+        $element.find('#eolgradediscussion_label')[0].textContent = "";
+        $element.find('#eolgradediscussion_label')[0].style.display = "none";
+        $element.find('#eolgradediscussion_wrong_label')[0].textContent = "";
+        $element.find('#eolgradediscussion_wrong_label')[0].style.display = "none";
         $(element).find('#ui-loading-forum-grade-load').show()
         var id_modal = $(this)[0].getAttribute('aria-controls')
         var forum_modal =  document.getElementById(id_modal)
@@ -188,12 +200,14 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         var score = data['score'] || '';
         
         var style_flecha = 'style="color: #c7bdbd;"';
+        var class_empty = 'class_empty_main_user';
         if (!isEmpty(data['student_forum'])){
             style_flecha = 'style="color: #0075b4;"';
+            class_empty = ''
         }
         var aux_id = data['id'] + '_forumgrade_' + settings.location;
         var flecha = '<span class="fa fa-chevron-right" aria-hidden="true" ' + style_flecha + '></span>';
-        var aux_html = '<li class="outline-item main_user"><div class="row row_gradeforum">'+
+        var aux_html = '<li class="outline-item main_user ' + class_empty +' "><div class="row row_gradeforum">'+
                     '<div class="col-md-3 eolgradediscussion_username"><span> '+data['username'] +'</span></div>'+
                     '<div class="col-md-5 eolgradediscussion_comment"></div>'+
                     '<div class="col-md-2 eolgradediscussion_puntaje" ><input name="puntaje" class="decimalx" type="text" value="'+score+'" aria-controls="'+data['id'] +'"></div>'+

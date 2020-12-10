@@ -65,16 +65,21 @@
                        <span class="copy">Guardando</span>
                        </p>
                    </div>
-                   <label style="cursor: default;color: royalblue;display: none; text-align: center;" id="eolgradediscussion_label"></label></br>
+                   <label style="cursor: default;color: royalblue;display: none; text-align: center;" id="eolgradediscussion_label"></label>
                    <label style="cursor: default;color: red;display: none; text-align: center;" id="eolgradediscussion_wrong_label"></label>
-                    <ul>
-                        <li class="action-item">
+                   <div class="row" style="text-align: center;">
+                        <div class="col-md-3">
                             <input id="save-button-forum-grade" name="sendall" class="sendall" type="button" style="width: 145px;margin-left: auto;" value="Guardar Cambios" disabled>
-                        </li>
-                        <li class="action-item">
+                        </div>
+                        <div class="col-md-2">
                             <a href="javascript:void(0);" onclick="$('#grade-1-eolgradediscussion-{{ location }}').hide();" class="button  action-cancel">Cerrar</a>
-                        </li>
-                    </ul>
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-6">
+                            <input type="checkbox" name='checkbox_users' id='checkbox_users' value="1">
+                            <label for="checkbox_users">Mostrar solo usuarios con participaciones</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
