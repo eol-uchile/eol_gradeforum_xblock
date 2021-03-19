@@ -135,6 +135,8 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         $.post(url_get_student_module, JSON.stringify({})).done(function(response) {
             //{'result': 'success', 'lista_alumnos': lista_alumnos, 'content_forum': content_forum}
             if (response.result == 'success' ){
+                titulo = $(element).find('#forum-grade-title')
+                titulo.html('');
                 create_modal_content(response.lista_alumnos, response.content_forum);
             }
             else {

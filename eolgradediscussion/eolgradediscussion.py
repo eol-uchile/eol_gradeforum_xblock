@@ -99,6 +99,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         from openedx.core.djangoapps.theming.helpers import get_current_request
         myrequest = get_current_request()
         settings = {
+            'id_forum': self.id_forum,
             'url_get_discussions': myrequest.build_absolute_uri(
                 '/api/discussion/v1/course_topics/{}'.format(
                     str(

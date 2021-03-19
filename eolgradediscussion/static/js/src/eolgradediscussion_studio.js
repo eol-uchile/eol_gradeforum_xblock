@@ -78,12 +78,22 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
                         if(lista_discussion[i]['id'] == null){
                             aux_html = aux_html + "<optgroup label='"+ lista_discussion[i]['name'] +"'>";
                             for (var j = 0; j<lista_discussion[i]['children'].length; j++){
-                                aux_html = aux_html + "<option value='" + lista_discussion[i]['children'][j]['id'] + "'> " + lista_discussion[i]['children'][j]['name'] + "</option>";
+                                if(settings.id_forum == lista_discussion[i]['children'][j]['id']){
+                                    aux_html = aux_html + "<option selected value='" + lista_discussion[i]['children'][j]['id'] + "'> " + lista_discussion[i]['children'][j]['name'] + "</option>";
+                                }
+                                else{
+                                    aux_html = aux_html + "<option value='" + lista_discussion[i]['children'][j]['id'] + "'> " + lista_discussion[i]['children'][j]['name'] + "</option>";
+                                }
                             }
                             aux_html = aux_html + "</optgroup>";
                         }
                         else{
-                            aux_html = aux_html + "<option value='" + lista_discussion[i]['id'] + "'> " + lista_discussion[i]['name'] + "</option>";
+                            if(settings.id_forum == lista_discussion[i]['id']){
+                                aux_html = aux_html + "<option selected value='" + lista_discussion[i]['id'] + "'> " + lista_discussion[i]['name'] + "</option>";
+                            }
+                            else{
+                                aux_html = aux_html + "<option value='" + lista_discussion[i]['id'] + "'> " + lista_discussion[i]['name'] + "</option>";
+                            }
                         }
                     }
                     html_id_forum.innerHTML = aux_html
