@@ -69,7 +69,12 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         default="",
         scope=Scope.settings,
     )
-
+    forum_display_name = String(
+        display_name=_("Display Name Forum"),
+        help=_("displayname forum for this module"),
+        default="",
+        scope=Scope.settings,
+    )
     has_author_view = True
     has_score = True
 
@@ -156,11 +161,15 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             context['is_course_staff'] = True
         else:
             score = ''
+            feedback = ''
             aux_pun = self.get_score(self.scope_ids.user_id)
             if aux_pun is not None and aux_pun >= 0:
                 score = aux_pun
-
+            state = self.get_feedback(self.scope_ids.user_id, course_key, self.block_id)
+            if 'feedback' in state:
+                feedback = state['feedback']
             context['puntaje'] = score
+            context['feedback'] = feedback
             context['is_course_staff'] = False
         return context
 
@@ -318,6 +327,70 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                     break
         return score
 
+    def get_feedback(self, student_id, course_key, block_key):
+        """
+        Return feedback by student_id
+        """
+        from lms.djangoapps.courseware.models import StudentModule
+        try:
+            student_module = StudentModule.objects.get(
+                student_id=student_id,
+                course_id=self.course_id,
+                module_state_key=self.location
+            )
+        except StudentModule.DoesNotExist:
+            student_module = None
+
+        if student_module:
+            return json.loads(student_module.state)
+        return {}
+
+    def get_all_student_module(self, course_key, block_key):
+        """
+        Return all feedback
+        """
+        from lms.djangoapps.courseware.models import StudentModule
+        try:
+            student_modules = StudentModule.objects.filter(
+                course_id=self.course_id,
+                module_state_key=self.location
+            )
+        except StudentModule.DoesNotExist:
+            student_modules = None
+
+        if student_modules:
+            all_modules = {}
+            for module in student_modules:
+                all_modules[module.student_id] = json.loads(module.state)
+            return all_modules
+        return {}
+
+    def get_or_create_student_module(self, student_id):
+        """
+        Gets or creates a StudentModule for the given user for this block
+        Returns:
+            StudentModule: A StudentModule object
+        """
+        # pylint: disable=no-member
+        from lms.djangoapps.courseware.models import StudentModule
+        student_module, created = StudentModule.objects.get_or_create(
+            course_id=self.course_id,
+            module_state_key=self.location,
+            student_id=student_id,
+            defaults={
+                'state': '{}',
+                'module_type': self.category,
+            }
+        )
+        if created:
+            log.info(
+                "Created student module %s [course: %s] [student: %s]",
+                student_module.module_state_key,
+                student_module.course_id,
+                student_module.student.username
+            )
+        return student_module
+
     def max_score(self):
         return self.puntajemax
 
@@ -330,6 +403,11 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
         calificado = 0
         if self.show_staff_grading_interface() and valida:
             for user_data in data.get('data'):
+                student_module = self.get_or_create_student_module(user_data['user_id'])
+                state = json.loads(student_module.state)
+                state['feedback'] = user_data['feedback']
+                student_module.state = json.dumps(state)
+                student_module.save()
                 if user_data['score'] != '':
                     score = int(user_data['score'])
                     from student.models import anonymous_id_for_user
@@ -372,6 +450,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 '+').isdigit() and int(data.get('puntajemax')) >= 0:
             self.display_name = data.get('display_name') or ""
             self.id_forum = data.get('id_forum') or ""
+            self.forum_display_name = data.get('forum_display_name') or ""
             self.puntajemax = int(data.get('puntajemax')) or 100
             return {'result': 'success'}
         return {'result': 'error'}
@@ -413,6 +492,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
 
         lista_alumnos = []
         calificado = 0
+        states = self.get_all_student_module(course_key, self.block_id)
         for a in enrolled_students:
             student_forum = {}
             if str(a['id']) in student_data:
@@ -423,11 +503,16 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 if filter_all_sub[anonymous_id] is not None and filter_all_sub[anonymous_id] >= 0:
                     puntaje = filter_all_sub[anonymous_id]
                     calificado = calificado + 1
-
+            feedback = ''
+            if a['id'] in states:
+                if 'feedback' in states[a['id']]:
+                    state = states[a['id']]
+                    feedback = state['feedback']
             lista_alumnos.append({'id': a['id'],
                                   'username': a['username'],
                                   'correo': a['email'],
                                   'score': puntaje,
+                                  'feedback': feedback,
                                   'student_forum': student_forum})
 
         return {

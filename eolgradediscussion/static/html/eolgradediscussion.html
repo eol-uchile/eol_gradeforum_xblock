@@ -32,7 +32,7 @@
                         <nav class="breadcrumbs" aria-label="Course Outline breadcrumb">
                             <ol class="bc-container bc-0 last">
                                 <li class="bc-container-content">
-                                    <span id="forum-grade-title" class="parent-displayname"> </span>
+                                    <span id="forum-grade-title" class="parent-displayname">{{xblock.forum_display_name}} </span>
                                 </li>
                                 <li class="bc-container-content">
                                     <span id="forum-grade-body" class="parent-content"> </span>
@@ -45,7 +45,7 @@
                            <span>Usuario</span>
                        </div>
                        <div class="col-md-5 eolgradediscussion_comment">
-                           <span> </span>
+                           <span>Feedback</span>
                        </div>
                        <div class="col-md-2" style="padding-top: 12px;">
                            <span>Puntaje</span>
@@ -91,6 +91,9 @@
                <label style="cursor: default;">No tiene calificaciones</label>
            {% else %}
                <label style="cursor: default;"> Calificado con: {{ puntaje }} de {{ xblock.puntajemax }}</label></br>
+           {% endif %}
+           {% if feedback != '' %}
+                <label style="cursor: default;"> Comentarios: {{ feedback }}</label> 
            {% endif %}
        </div>
     {% endif %}

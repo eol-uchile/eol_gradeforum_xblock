@@ -438,6 +438,15 @@
 .eolgradediscussion_block .eolgradediscussion_comment {
     padding-top: 12px;
 }
+.eolgradediscussion_block .eolgradediscussion_comment_main {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.eolgradediscussion_block .eolgradediscussion_comment_main textarea {
+  width: 100%;
+  height: 34px;
+  min-height: 34px;
+}
 .eolgradediscussion_block .eolgradediscussion_puntaje {
     padding-top: 5px;
 }
