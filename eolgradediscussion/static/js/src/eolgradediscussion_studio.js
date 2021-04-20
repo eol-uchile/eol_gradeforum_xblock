@@ -61,7 +61,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             /*
             * Get all ids discussion
             */
-            url_get_discussions = settings.url_get_discussions.replace('http:', 'https:');
+            url_get_discussions = settings.url_get_discussions;
             $.ajax({
                 url: url_get_discussions,
                 dataType: 'json',
