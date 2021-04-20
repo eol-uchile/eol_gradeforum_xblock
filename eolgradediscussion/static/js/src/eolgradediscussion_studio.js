@@ -13,10 +13,14 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
     $(element).find('.save-button-eolgradediscussion').bind('click', function(eventObject) {
         eventObject.preventDefault();
         var handlerUrl = runtime.handlerUrl(element, 'studio_submit');
-        if($(element).find('#id_forum').val() != ''){
+        if($(element).find('select[name="id_forum"]').val() != ''){
+            select_id_forum = document.getElementById($(element).find('select[name="id_forum"]')[0].id)
+            const index = select_id_forum.selectedIndex;
+            const option = select_id_forum.options[index];
             var data = {
                 'display_name': $(element).find('input[name=display_name]').val(),
-                'id_forum': $(element).find('#id_forum').val(),
+                'id_forum': $(element).find('select[name="id_forum"]').val(),
+                'forum_display_name': option.text,
                 'puntajemax': $(element).find('input[name=puntajemax]').val(),
             };
             if ($.isFunction(runtime.notify)) {
@@ -72,7 +76,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
                 crossDomain: true,
                 success: function(response){
                     var aux_html = '';
-                    var html_id_forum = $(element).find('#id_forum')[0];
+                    var html_id_forum = $(element).find('select[name="id_forum"]')[0];
                     var lista_discussion = response['courseware_topics'].concat(response['non_courseware_topics']);
                     for (var i = 0; i<lista_discussion.length; i++){
                         if(lista_discussion[i]['id'] == null){

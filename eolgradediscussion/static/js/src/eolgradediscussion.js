@@ -61,7 +61,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
     }
     $(element).find('#save-button-forum-grade').live('click', function(e) {
         /*
-            Save user's score
+            Save user's score and feedback
         */
         e.currentTarget.disabled = true;
         $(element).find('#ui-loading-forum-grade-load-footer').show();
@@ -73,7 +73,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             var punt = puntajes[i].value;
             var user_id = puntajes[i].getAttribute('aria-controls');
             var pmax = settings.puntajemax;
-
+            var feedback = puntajes[i].parentElement.parentElement.children[1].children[0].value
             if (punt != "" && (punt.includes(".") || parseInt(punt, 10) > parseInt(pmax, 10) || parseInt(punt, 10) < 0)){
                 check = false;
                 $element.find('#eolgradediscussion_wrong_label')[0].textContent = "Revise los campos si estan correctos";
@@ -83,7 +83,8 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             else{
                 var aux = {
                     'user_id':user_id,
-                    'score': punt
+                    'score': punt,
+                    'feedback': feedback
                 }
                 data.push(aux)
             }
@@ -135,12 +136,12 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         $.post(url_get_student_module, JSON.stringify({})).done(function(response) {
             //{'result': 'success', 'lista_alumnos': lista_alumnos, 'content_forum': content_forum}
             if (response.result == 'success' ){
-                titulo = $(element).find('#forum-grade-title')
+                titulo = $(element).find('#forum-grade-body')
                 titulo.html('');
                 create_modal_content(response.lista_alumnos, response.content_forum);
             }
             else {
-                titulo = $(element).find('#forum-grade-title')
+                titulo = $(element).find('#forum-grade-body')
                 if (response.result == 'user is not course staff' ){
                     titulo.html('Usuario no tiene permisos para obtener los datos.');
                 }
@@ -163,7 +164,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             window.scroll(0,findPos(document.getElementById(id_modal)) - 450);
             e.currentTarget.disabled = false;
         }).fail(function() {
-            titulo = $(element).find('#forum-grade-title')
+            titulo = $(element).find('#forum-grade-body')
             titulo.html('Se ha producido un error en obtener los datos');
             $(element).find('#ui-loading-forum-grade-load').hide();
             forum_modal.style.display = "block";
@@ -211,7 +212,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         var flecha = '<span class="fa fa-chevron-right" aria-hidden="true" ' + style_flecha + '></span>';
         var aux_html = '<li class="outline-item main_user ' + class_empty +' "><div class="row row_gradeforum">'+
                     '<div class="col-md-3 eolgradediscussion_username"><span> '+data['username'] +'</span></div>'+
-                    '<div class="col-md-5 eolgradediscussion_comment"></div>'+
+                    '<div class="col-md-5 eolgradediscussion_comment_main"><textarea class="eolgradediscussion_comment_input" type="text" spellcheck="false">'+data['feedback'] +'</textarea></div>'+
                     '<div class="col-md-2 eolgradediscussion_puntaje" ><input name="puntaje" class="decimalx" type="text" value="'+score+'" aria-controls="'+data['id'] +'"></div>'+
                     '<div class="col-md-2 eolgradediscussion_flecha"><button class="forumgrade-row-button" aria-expanded="false" aria-controls="'+aux_id+'">'+
                         flecha+
@@ -359,7 +360,9 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         }   
         else{
             $(element).find('#save-button-forum-grade')[0].disabled = true
-        }   
-    
+        }
+    });
+    $(element).find('.eolgradediscussion_comment_input').live('keyup', function(e) {
+        $(element).find('#save-button-forum-grade')[0].disabled = false
     });
 }

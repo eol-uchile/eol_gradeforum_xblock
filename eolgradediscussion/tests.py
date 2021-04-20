@@ -136,6 +136,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         response = self.xblock.get_context()
         self.assertEqual(response['is_course_staff'], False)
         self.assertEqual(response['puntaje'], '')
+        self.assertEqual(response['feedback'], '')
 
     @patch('lms.djangoapps.grades.signals.handlers.PROBLEM_WEIGHTED_SCORE_CHANGED.send')
     def test_save_staff_user(self, _):
@@ -148,8 +149,8 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id': self.student.id, 'score': "11"},
-                 {'user_id': self.staff_user.id, 'score': "22"}]
+        datos = [{'user_id': self.student.id, 'score': "11", 'feedback': ''},
+                 {'user_id': self.staff_user.id, 'score': "22", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
 
@@ -173,8 +174,8 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.xmodule_runtime.user_is_staff = False
 
         self.xblock.scope_ids.user_id = self.student.id
-        datos = [{'user_id': self.student.id, 'score': "11"},
-                 {'user_id': self.staff_user.id, 'score': "22"}]
+        datos = [{'user_id': self.student.id, 'score': "11", 'feedback': ''},
+                 {'user_id': self.staff_user.id, 'score': "22", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -194,8 +195,8 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id': self.student.id, 'score': "asd1"},
-                 {'user_id': self.staff_user.id, 'score': "22"}]
+        datos = [{'user_id': self.student.id, 'score': "asd1", 'feedback': ''},
+                 {'user_id': self.staff_user.id, 'score': "22", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -213,13 +214,39 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id': self.student.id, 'score': "100"},
-                 {'user_id': self.staff_user.id, 'score': "100"}]
+        datos = [{'user_id': self.student.id, 'score': "100", 'feedback': ''},
+                 {'user_id': self.staff_user.id, 'score': "100", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
         self.assertEqual(self.xblock.get_score(self.student.id), 100)
         self.assertEqual(self.xblock.get_score(self.staff_user.id), 100)
+
+    @patch('lms.djangoapps.grades.signals.handlers.PROBLEM_WEIGHTED_SCORE_CHANGED.send')
+    def test_save_staff_user_with_feedback(self, _):
+        """
+          Save score by staff user with feedback
+        """
+
+        request = TestRequest()
+        request.method = 'POST'
+
+        self.xblock.xmodule_runtime.user_is_staff = True
+        self.xblock.scope_ids.user_id = self.staff_user.id
+        datos = [{'user_id': self.student.id, 'score': "11", 'feedback':'this is a comment'},
+                 {'user_id': self.staff_user.id, 'score': "22", 'feedback':'this is a comment part 2'}]
+        data = json.dumps({"data": datos})
+        request.body = data.encode()
+
+        response = self.xblock.savestudentanswersall(request)
+        self.assertEqual(self.xblock.get_score(self.student.id), 11)
+        self.assertEqual(self.xblock.get_score(self.staff_user.id), 22)
+        self.xblock.xmodule_runtime.user_is_staff = False
+        self.xblock.scope_ids.user_id = self.student.id
+        response = self.xblock.get_context()
+        self.assertEqual(response['is_course_staff'], False)
+        self.assertEqual(response['puntaje'], 11)
+        self.assertEqual(response['feedback'], 'this is a comment')
 
     @patch('lms.djangoapps.grades.signals.handlers.PROBLEM_WEIGHTED_SCORE_CHANGED.send')
     def test_save_student_score_min_score(self, _):
@@ -232,8 +259,8 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id': self.student.id, 'score': "0"},
-                 {'user_id': self.staff_user.id, 'score': "0"}]
+        datos = [{'user_id': self.student.id, 'score': "0", 'feedback': ''},
+                 {'user_id': self.staff_user.id, 'score': "0", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -250,7 +277,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id': self.student.id, 'score': "-10"}]
+        datos = [{'user_id': self.student.id, 'score': "-10", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -267,7 +294,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        datos = [{'user_id': self.student.id, 'score': "101"}]
+        datos = [{'user_id': self.student.id, 'score': "101", 'feedback': ''}]
         data = json.dumps({"data": datos})
         request.body = data.encode()
         response = self.xblock.savestudentanswersall(request)
@@ -584,6 +611,13 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
         self.xblock.id_forum = 'adsadad'
+        from lms.djangoapps.courseware.models import StudentModule
+        module = StudentModule(
+            module_state_key=self.xblock.location,
+            student_id=self.student.id,
+            course_id=self.course.id,
+            state=json.dumps({"feedback": "comentario121"}))
+        module.save()
         response = self.xblock.get_data_forum(request)
         data_response = json.loads(response._app_iter[0].decode())
 
@@ -594,6 +628,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                 'username': self.staff_user.username,
                 'correo': self.staff_user.email,
                 'score': '',
+                'feedback': '',
                 'student_forum': {
                     "5faae1182f1f5e001b09d32a": {},
                     "5fbbcd282f1f5e001a0740c4": {
@@ -603,6 +638,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                 'username': self.student.username,
                 'correo': self.student.email,
                     'score': '',
+                    'feedback': 'comentario121',
                     'student_forum': {
                         '5fbbcd282f1f5e001a0740c4': {},
                         '5faae1182f1f5e001b09d32a': {
@@ -752,11 +788,13 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                           'username': self.staff_user.username,
                           'correo': self.staff_user.email,
                           'score': '',
+                          'feedback': '',
                           'student_forum': {"5faae1182f1f5e001b09d32a": {},
                                             }},
                          {'id': self.student.id,
                           'username': self.student.username,
                           'correo': self.student.email,
                           'score': '',
+                          'feedback': '',
                           'student_forum': {}}]
         self.assertEqual(data_response['lista_alumnos'], lista_alumnos)
