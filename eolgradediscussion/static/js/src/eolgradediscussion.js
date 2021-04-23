@@ -76,8 +76,6 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             var feedback = puntajes[i].parentElement.parentElement.children[1].children[0].value
             if (punt != "" && (punt.includes(".") || parseInt(punt, 10) > parseInt(pmax, 10) || parseInt(punt, 10) < 0)){
                 check = false;
-                $element.find('#eolgradediscussion_wrong_label')[0].textContent = "Revise los campos si estan correctos";
-                $element.find('#eolgradediscussion_label')[0].textContent = "";
                 break;
             }
             else{
@@ -96,6 +94,12 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
                 data: JSON.stringify({"data": data}),
                 success: showAnswers
             });
+        }
+        else{
+            $element.find('#eolgradediscussion_wrong_label')[0].textContent = "Revise los campos si estan correctos";
+            $element.find('#eolgradediscussion_label')[0].textContent = "";
+            $(element).find('#ui-loading-forum-grade-load-footer').hide();
+            $element.find('#eolgradediscussion_wrong_label')[0].style.display = "block";
         }
     });
     $(element).find('#checkbox_users').live('change', function(e) {
@@ -349,20 +353,28 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
 
     $(element).find('.decimalx').live('keyup', function(e) {
         var val = $(this).val()
+        var check_score = $(element).find('#check_score')[0]
         if(isNaN(val) || val.includes(".")){
             val = val.replace(/[^0-9]/g , '')
         }
         $(this).val(val)
+        if (val == ''){
+            val = '0'
+        }
         var pmax = settings.puntajemax
-
         if (parseInt(val, 10) <= parseInt(pmax, 10) && parseInt(val, 10) >= 0 ){
             $(element).find('#save-button-forum-grade')[0].disabled = false
+            check_score.value = '1'
         }   
         else{
             $(element).find('#save-button-forum-grade')[0].disabled = true
+            check_score.value = '0'
         }
     });
     $(element).find('.eolgradediscussion_comment_input').live('keyup', function(e) {
-        $(element).find('#save-button-forum-grade')[0].disabled = false
+        var check_score = $(element).find('#check_score')[0]
+        if(check_score.value == '1'){
+            $(element).find('#save-button-forum-grade')[0].disabled = false
+        }
     });
 }
