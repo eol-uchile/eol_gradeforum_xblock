@@ -24,6 +24,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             $element.find('#eolgradediscussion_wrong_label')[0].textContent = "";
             $element.find('#eolgradediscussion_wrong_label')[0].style.display = "none";
             $element.find("#calificado")[0].textContent = parseInt($element.find("#calificado")[0].textContent) + result.calificado;
+            $(element).find('#save-button-forum-grade')[0].disabled = false
         }
         if (result.result == 'error'){
             $element.find('#eolgradediscussion_label')[0].textContent = "";
@@ -32,7 +33,13 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             $element.find('#eolgradediscussion_wrong_label')[0].style.display = "block";
         }
     }
-
+    function errorMesagges(response){
+        $element.find('#eolgradediscussion_label')[0].textContent = "";
+        $element.find('#eolgradediscussion_label')[0].style.display = "none";
+        $element.find('#eolgradediscussion_wrong_label')[0].textContent = "Error de datos o rol de usuario";
+        $element.find('#eolgradediscussion_wrong_label')[0].style.display = "block";
+        $(element).find('#ui-loading-forum-grade-load-footer').hide();
+    }
     function create_modal_content(lista_alumnos, content_forum){
         /*  
             Create modal content
@@ -92,7 +99,8 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
                 type: "POST",
                 url: handlerUrlSaveStudentAnswersAll,
                 data: JSON.stringify({"data": data}),
-                success: showAnswers
+                success: showAnswers,
+                error: errorMesagges
             });
         }
         else{
@@ -100,6 +108,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             $element.find('#eolgradediscussion_label')[0].textContent = "";
             $(element).find('#ui-loading-forum-grade-load-footer').hide();
             $element.find('#eolgradediscussion_wrong_label')[0].style.display = "block";
+            e.currentTarget.disabled = false;
         }
     });
     $(element).find('#checkbox_users').live('change', function(e) {
@@ -141,8 +150,9 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
             //{'result': 'success', 'lista_alumnos': lista_alumnos, 'content_forum': content_forum}
             if (response.result == 'success' ){
                 titulo = $(element).find('#forum-grade-body')
-                titulo.html('');
+                titulo.html('Puntaje máximo: ' + settings.puntajemax);
                 create_modal_content(response.lista_alumnos, response.content_forum);
+                $(element).find('#save-button-forum-grade')[0].disabled = false
             }
             else {
                 titulo = $(element).find('#forum-grade-body')
@@ -353,7 +363,6 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
 
     $(element).find('.decimalx').live('keyup', function(e) {
         var val = $(this).val()
-        var check_score = $(element).find('#check_score')[0]
         if(isNaN(val) || val.includes(".")){
             val = val.replace(/[^0-9]/g , '')
         }
@@ -363,18 +372,10 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         }
         var pmax = settings.puntajemax
         if (parseInt(val, 10) <= parseInt(pmax, 10) && parseInt(val, 10) >= 0 ){
-            $(element).find('#save-button-forum-grade')[0].disabled = false
-            check_score.value = '1'
+            e.currentTarget.className = 'decimalx';
         }   
         else{
-            $(element).find('#save-button-forum-grade')[0].disabled = true
-            check_score.value = '0'
-        }
-    });
-    $(element).find('.eolgradediscussion_comment_input').live('keyup', function(e) {
-        var check_score = $(element).find('#check_score')[0]
-        if(check_score.value == '1'){
-            $(element).find('#save-button-forum-grade')[0].disabled = false
+            e.currentTarget.className = 'decimalx error_decimal';
         }
     });
 }

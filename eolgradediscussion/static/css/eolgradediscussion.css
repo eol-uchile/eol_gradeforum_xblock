@@ -356,7 +356,9 @@
     transform: translate(-50%, -50%);
     outline: none;
 }
-
+#grade-1-forum-grade input:focus, #grade-1-forum-grade textarea:focus, #grade-1-forum-grade select:focus{
+  outline: none;
+}
 #grade-1-forum-grade .eolgradediscussion_modal-content{
     height: 90%;
     min-height: 100px;
@@ -457,6 +459,12 @@
     width: 54px;
     margin-left: auto;
     margin-left: auto;
+}
+.eolgradediscussion_block .decimalx:focus-visible {
+  border: 1px solid rgb(217, 217, 217);
+}
+.eolgradediscussion_block .error_decimal, .eolgradediscussion_block .error_decimal:focus-visible {
+  border: 2px solid red;
 }
 .eolgradediscussion_block .is-hidden {
     display: none;
