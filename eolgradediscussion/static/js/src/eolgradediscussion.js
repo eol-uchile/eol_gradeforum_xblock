@@ -77,7 +77,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
         var check = true;
         var data =  new Array();
         for(i=0;i<puntajes.length;i++){
-            var punt = puntajes[i].value;
+            var punt = puntajes[i].value.trim();
             var user_id = puntajes[i].getAttribute('aria-controls');
             var pmax = settings.puntajemax;
             var feedback = puntajes[i].parentElement.parentElement.children[1].children[0].value
@@ -362,7 +362,7 @@ function EolGradeDiscussionXBlock(runtime, element, settings) {
     });
 
     $(element).find('.decimalx').live('keyup', function(e) {
-        var val = $(this).val()
+        var val = $(this).val().trim()
         if(isNaN(val) || val.includes(".")){
             val = val.replace(/[^0-9]/g , '')
         }
