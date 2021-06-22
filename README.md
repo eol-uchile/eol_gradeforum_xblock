@@ -11,7 +11,7 @@ This XBlock allow to grade the participation in the forum according to the stude
 
 # Configuration
 
-Edit *production.py* in *lms settings* and set the limit_thread, this parameter configures the maximum number of publications that are obtained from a discussion.
+Edit *production.py* in *lms and cms settings* and set the limit_thread, this parameter configures the maximum number of publications that are obtained from a discussion.
 
     EOLGRADEFORUM_LIMIT_THREADS = 5000
     CORS_ALLOW_CREDENTIALS = True
