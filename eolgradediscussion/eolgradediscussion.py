@@ -204,7 +204,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             Return anonymous id
         """
         from django.contrib.auth.models import User
-        from student.models import anonymous_id_for_user
+        from common.djangoapps.student.models import anonymous_id_for_user
 
         course_key = self.course_id
         return anonymous_id_for_user(
@@ -415,7 +415,7 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 student_module.save()
                 if user_data['score'] != '':
                     score = int(user_data['score'])
-                    from student.models import anonymous_id_for_user
+                    from common.djangoapps.student.models import anonymous_id_for_user
                     from django.contrib.auth.models import User
                     from submissions import api as submissions_api
                     course_key = self.course_id

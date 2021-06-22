@@ -9,14 +9,14 @@ import json
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from util.testing import UrlResetMixin
+from common.djangoapps.util.testing import UrlResetMixin
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 from xmodule.modulestore.tests.factories import CourseFactory
-from student.tests.factories import UserFactory, CourseEnrollmentFactory
+from common.djangoapps.student.tests.factories import UserFactory, CourseEnrollmentFactory
 from xblock.field_data import DictFieldData
-from student.roles import CourseStaffRole
+from common.djangoapps.student.roles import CourseStaffRole
 from django.test.utils import override_settings
 from .eolgradediscussion import EolGradeDiscussionXBlock
 
@@ -73,7 +73,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
 
         self.xblock = self.make_an_xblock()
 
-        with patch('student.models.cc.User.save'):
+        with patch('common.djangoapps.student.models.cc.User.save'):
             # Create the student
             self.student = UserFactory(
                 username='student',
