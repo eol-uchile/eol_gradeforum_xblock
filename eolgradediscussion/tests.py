@@ -1,33 +1,20 @@
 # -*- coding: utf-8 -*-
 
 
-from mock import patch, Mock, PropertyMock
+from mock import patch, Mock
 from collections import namedtuple
-
 import json
-
-from django.test import TestCase, Client
-from django.urls import reverse
-
 from common.djangoapps.util.testing import UrlResetMixin
-from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 from xmodule.modulestore.tests.factories import CourseFactory
 from common.djangoapps.student.tests.factories import UserFactory, CourseEnrollmentFactory
 from xblock.field_data import DictFieldData
 from common.djangoapps.student.roles import CourseStaffRole
-from django.test.utils import override_settings
 from .eolgradediscussion import EolGradeDiscussionXBlock
-
-from six import text_type
-import urllib.parse
-from urllib.parse import parse_qs
-from datetime import datetime as dt
-import datetime
 import logging
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 class TestRequest(object):
     # pylint: disable=too-few-public-methods
