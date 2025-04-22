@@ -3,7 +3,7 @@
 
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def package_data(pkg, roots):
@@ -24,12 +24,12 @@ def package_data(pkg, roots):
 
 setup(
     name='eolgradediscussion',
-    version='0.1',
+    version='1.0.0',
+    author="Oficina EOL UChile",
+    author_email="eol-ing@uchile.cl",
     description='Eol Grade Forum Xblock',
     license='AGPL v3',
-    packages=[
-        'eolgradediscussion',
-    ],
+    packages=find_packages(),
     install_requires=[
         'XBlock',
     ],
