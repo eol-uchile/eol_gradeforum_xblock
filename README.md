@@ -1,5 +1,7 @@
 # EOL Grade Forum XBlock
 
+![Coverage Status](/coverage-badge.svg)
+
 ![https://github.com/eol-uchile/eol_gradeforum_xblock/actions](https://github.com/eol-uchile/eol_gradeforum_xblock/workflows/Python%20application/badge.svg)
 
 This XBlock allow to grade the participation in the forum according to the student.
@@ -23,5 +25,10 @@ Edit *production.py* in *lms and cms settings* and set the limit_thread, this pa
 ## TESTS
 **Prepare tests:**
 
-    > cd .github/
-    > docker-compose run --rm lms /openedx/requirements/eol_gradeforum_xblock/.github/test.sh
+- Install **act** following the instructions in [https://nektosact.com/installation/index.html](https://nektosact.com/installation/index.html)
+
+**Run tests:**
+- In a terminal at the root of the project
+    ```
+    act -W .github/workflows/pythonapp.yml
+    ```
