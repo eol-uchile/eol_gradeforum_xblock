@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-
-
-from mock import patch, Mock
+# Python Standard Libraries
 from collections import namedtuple
 import json
-from common.djangoapps.util.testing import UrlResetMixin
-from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
-
-from xmodule.modulestore.tests.factories import CourseFactory
-from common.djangoapps.student.tests.factories import UserFactory, CourseEnrollmentFactory
-from xblock.field_data import DictFieldData
-from common.djangoapps.student.roles import CourseStaffRole
-from .eolgradediscussion import EolGradeDiscussionXBlock
 import logging
+
+# Installed packages (via pip)
+from mock import patch, Mock
+
+# Edx dependencies
+from common.djangoapps.student.roles import CourseStaffRole
+from common.djangoapps.student.tests.factories import UserFactory, CourseEnrollmentFactory
+from common.djangoapps.util.testing import UrlResetMixin
+from xblock.field_data import DictFieldData
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
+from xmodule.modulestore.tests.factories import CourseFactory
+
+# Internal project dependencies
+from .eolgradediscussion import EolGradeDiscussionXBlock
 
 logger = logging.getLogger(__name__)
 
