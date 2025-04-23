@@ -207,13 +207,6 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             User.objects.get(
                 id=student_id), course_key)
 
-    def is_instructor(self):
-        # pylint: disable=no-member
-        """
-        Check if user role is instructor.
-        """
-        return self.xmodule_runtime.get_user_role() == 'instructor'
-
     def show_staff_grading_interface(self):
         """
         Return if current user is staff and not in studio.
@@ -391,9 +384,6 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 student_module.student.username
             )
         return student_module
-
-    def max_score(self):
-        return self.puntajemax
 
     @XBlock.json_handler
     def savestudentanswersall(self, data, suffix=''):
