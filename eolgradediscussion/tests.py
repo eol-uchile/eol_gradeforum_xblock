@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-
-
-from mock import patch, Mock
+# Python Standard Libraries
 from collections import namedtuple
 import json
-from common.djangoapps.util.testing import UrlResetMixin
-from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
-
-from xmodule.modulestore.tests.factories import CourseFactory
-from common.djangoapps.student.tests.factories import UserFactory, CourseEnrollmentFactory
-from xblock.field_data import DictFieldData
-from common.djangoapps.student.roles import CourseStaffRole
-from .eolgradediscussion import EolGradeDiscussionXBlock
 import logging
+
+# Installed packages (via pip)
+from mock import patch, Mock
+
+# Edx dependencies
+from common.djangoapps.student.roles import CourseStaffRole
+from common.djangoapps.student.tests.factories import UserFactory, CourseEnrollmentFactory
+from common.djangoapps.util.testing import UrlResetMixin
+from xblock.field_data import DictFieldData
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
+from xmodule.modulestore.tests.factories import CourseFactory
+
+# Internal project dependencies
+from .eolgradediscussion import EolGradeDiscussionXBlock
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +106,22 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.assertEqual(self.xblock.display_name, 'testname')
         self.assertEqual(self.xblock.puntajemax, 200)
         self.assertEqual(self.xblock.id_forum, 'test_id')
+    
+    def test_edit_block_studio_wrong_data(self):
+        """
+            Verify submit studio edits is working when puntajemax is wrong
+        """
+        request = TestRequest()
+        request.method = 'POST'
+        self.xblock.xmodule_runtime.user_is_staff = True
+        data = json.dumps({'display_name': 'testname',
+                           "puntajemax": '-200', "id_forum": 'test_id'})
+        request.body = data.encode()
+        response = self.xblock.studio_submit(request)
+        self.assertEqual(
+            response.json_body['result'],
+            'error'
+        )
 
     def test_student_view_staff(self):
         """
@@ -254,7 +274,7 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
         self.assertEqual(self.xblock.get_score(self.student.id), 0)
         self.assertEqual(self.xblock.get_score(self.staff_user.id), 0)
 
-    def test_save_student_score_min_score_wrong(self):
+    def test_save_student_score_min_score_wrong_less_than_zero(self):
         """
           Save score by staff user with score < 0
         """
@@ -785,3 +805,50 @@ class TestGradeForum(UrlResetMixin, ModuleStoreTestCase):
                           'feedback': '',
                           'student_forum': {}}]
         self.assertEqual(data_response['lista_alumnos'], lista_alumnos)
+
+    def test_student_view_render(self):
+        """
+            Check if xblock student template loads correctly
+        """
+        self.xblock.scope_ids.user_id = self.student.id
+        student_view = self.xblock.student_view()
+        student_view_html = student_view.content
+        self.assertIn('class="eolgradediscussion_block"', student_view_html)
+
+    @patch('openedx.core.djangoapps.theming.helpers.get_current_request')
+    def test_studio_view_render(self,_):
+        """
+            Check if xblock studio template loads correctly
+        """
+        studio_view = self.xblock.studio_view()
+        studio_view_html = studio_view.content
+        self.assertIn('id="eolgradediscussion_loading"', studio_view_html)
+
+    def test_author_view_render(self):
+        """
+            Check if xblock author template loads correctly
+        """
+        author_view = self.xblock.author_view()
+        author_view_html = author_view.content
+        self.assertIn('class="eolgradediscussion_block_author"', author_view_html)
+
+    def test_workbench_scenarios(self):
+        """
+            Checks that 'workbench_scenarios' methods returns the expected title and XML 
+            for the basic EolGradeDiscussionXBlock scenario.
+        """
+        result_title = 'EolGradeDiscussionXBlock'
+        basic_scenario = "<eolgradediscussion/>"
+        test_result = self.xblock.workbench_scenarios()
+        self.assertEqual(result_title, test_result[0][0])
+        self.assertIn(basic_scenario, test_result[0][1])
+
+    def test_get_student_item_dict_student_id_none(self):
+        """
+            Checks get_student_item_dict fuction when student_id is None
+        """
+        response = self.xblock.get_student_item_dict(None)
+        self.assertEqual(
+            response['student_id']._mock_name,
+            'anonymous_student_id'
+        )

@@ -1,25 +1,21 @@
-import pkg_resources
-import six
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
-import requests
-import logging
+# Python Standard Libraries
 import json
-from six import text_type
+import logging
 
-from xblock.exceptions import JsonHandlerError, NoSuchViewError
-from xblock.validation import Validation
-from xblockutils.resources import ResourceLoader
+# Installed packages (via pip)
 from django.conf import settings as DJANGO_SETTINGS
 from django.template import Context, Template
-from django.core.cache import cache
-from xblock.core import XBlock
-from xblock.fields import Integer, Scope, String, Dict, Float, Boolean, List, DateTime, JSONField
-from xblock.fragment import Fragment
-from xblockutils.studio_editable import StudioEditableXBlockMixin
-from opaque_keys.edx.keys import CourseKey, UsageKey
 from django.urls import reverse
+import pkg_resources
+import six
+
+# Edx dependencies
+from xblock.core import XBlock
+from xblock.fields import Integer, Scope, String
+from xblock.fragment import Fragment
+from xblockutils.resources import ResourceLoader
+from xblockutils.studio_editable import StudioEditableXBlockMixin
+
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -211,13 +207,6 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
             User.objects.get(
                 id=student_id), course_key)
 
-    def is_instructor(self):
-        # pylint: disable=no-member
-        """
-        Check if user role is instructor.
-        """
-        return self.xmodule_runtime.get_user_role() == 'instructor'
-
     def show_staff_grading_interface(self):
         """
         Return if current user is staff and not in studio.
@@ -395,9 +384,6 @@ class EolGradeDiscussionXBlock(StudioEditableXBlockMixin, XBlock):
                 student_module.student.username
             )
         return student_module
-
-    def max_score(self):
-        return self.puntajemax
 
     @XBlock.json_handler
     def savestudentanswersall(self, data, suffix=''):
