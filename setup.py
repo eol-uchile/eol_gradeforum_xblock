@@ -24,7 +24,7 @@ def package_data(pkg, roots):
 
 setup(
     name='eolgradediscussion',
-    version='1.0.0',
+    version='1.0.1',
     author="Oficina EOL UChile",
     author_email="eol-ing@uchile.cl",
     description='Eol Grade Forum Xblock',
